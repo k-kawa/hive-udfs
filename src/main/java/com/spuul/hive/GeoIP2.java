@@ -46,6 +46,7 @@ import com.maxmind.geoip2.record.Country;
 import com.maxmind.geoip2.record.Location;
 import com.maxmind.geoip2.record.Postal;
 import com.maxmind.geoip2.record.Subdivision;
+import com.maxmind.geoip2.exception.AddressNotFoundException;
 
 import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
@@ -166,10 +167,18 @@ public class GeoIP2 extends GenericUDF {
                                 default:
                                         throw new UnsupportedOperationException("Unknown database type " + databaseType);
                         }
-                        return new Text(retVal);
+                        if (retVal == null) {
+                                return new Text("UNKNOWN");
+                        } else {
+                                return new Text(retVal);
+                        }
+                }
+                catch(AddressNotFoundException e) {
+                        return new Text("UNKNOWN");
                 }
                 catch(Exception e) {
-                        throw new UnsupportedOperationException(e.getMessage());
+                        e.printStackTrace();
+                        throw new UnsupportedOperationException(e);
                 }
         }
 
